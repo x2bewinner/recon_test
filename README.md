@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # 財務系統 - 交易審計註冊對帳應用程式
 
 這是一個 Spring Boot 應用程式，用於處理交易審計註冊對帳（Transaction Audit Register Reconciliation）。系統會接收設備發送的審計註冊請求，處理交易資料，並自動處理設備重啟和跨日期未完成交易的情況。
