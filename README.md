@@ -520,22 +520,37 @@ A:
 ## 📚 專案結構
 
 ```
-src/
-├── main/
-│   ├── java/com/financial/recon/
-│   │   ├── ReconApplication.java          # Spring Boot 主應用程式
-│   │   ├── controller/
-│   │   │   └── AuditRegisterController.java    # REST API 控制器
-│   │   ├── service/
-│   │   │   └── AuditRegisterService.java       # 業務邏輯服務層
-│   │   ├── repository/                          # 資料庫存取層
-│   │   ├── entity/                              # 實體類
-│   │   ├── dto/                                 # 資料傳輸物件
-│   │   └── exception/
-│   │       └── GlobalExceptionHandler.java     # 全域異常處理
-│   └── resources/
-│       ├── application.yml                      # 應用程式配置
-│       └── db/migration/                        # 資料庫遷移腳本
+.
+├── src/
+│   ├── main/
+│   │   ├── java/com/financial/recon/
+│   │   │   ├── ReconApplication.java          # Spring Boot 主應用程式
+│   │   │   ├── controller/
+│   │   │   │   └── AuditRegisterController.java    # REST API 控制器
+│   │   │   ├── service/
+│   │   │   │   └── AuditRegisterService.java       # 業務邏輯服務層
+│   │   │   ├── repository/                          # 資料庫存取層
+│   │   │   ├── entity/                              # 實體類
+│   │   │   ├── dto/                                 # 資料傳輸物件
+│   │   │   └── exception/
+│   │   │       └── GlobalExceptionHandler.java     # 全域異常處理
+│   │   └── resources/
+│   │       ├── application.yml                      # 應用程式配置
+│   │       └── db/migration/                        # 資料庫遷移腳本
+│   └── test/
+│       ├── java/                                   # 測試類
+│       └── resources/
+│           ├── application-test.yml                 # 測試配置
+│           └── test-data/                           # 測試資料 JSON
+├── postman/
+│   ├── Recon_API.postman_collection.json           # Postman Collection
+│   ├── Recon_API.postman_environment.json          # Postman 環境配置
+│   └── README.md                                    # Postman 使用說明
+├── README.md                                        # 專案說明文件
+├── TEST_GUIDE.md                                   # 測試指南
+├── TEST_SUMMARY.md                                 # 測試摘要
+├── pom.xml                                         # Maven 配置
+└── run-tests.sh                                    # 測試執行腳本
 ```
 
 ## 🔗 相關資源
@@ -606,6 +621,36 @@ mvn test -Dtest=AuditRegisterControllerTest
 ### 測試配置
 
 測試使用 H2 內存資料庫，無需配置外部資料庫。測試配置檔案位於 `src/test/resources/application-test.yml`。
+
+### Postman 測試集合
+
+專案包含完整的 Postman Collection，位於 `postman/` 目錄：
+
+- **Recon_API.postman_collection.json** - Postman Collection（10 個測試案例）
+- **Recon_API.postman_environment.json** - 環境配置檔案
+- **postman/README.md** - Postman 使用說明
+
+#### 導入 Postman Collection
+
+1. 打開 Postman
+2. 點擊 **Import** 按鈕
+3. 選擇 `postman/Recon_API.postman_collection.json`
+4. 導入環境配置：`postman/Recon_API.postman_environment.json`
+5. 選擇環境：**Recon API - Local**
+
+#### 使用 Newman 執行（CI/CD）
+
+```bash
+# 安裝 Newman
+npm install -g newman
+
+# 執行 Collection
+newman run postman/Recon_API.postman_collection.json \
+  -e postman/Recon_API.postman_environment.json \
+  --reporters cli,html
+```
+
+詳細的 Postman 使用說明，請參閱 [postman/README.md](postman/README.md)。
 
 ### 詳細測試文檔
 

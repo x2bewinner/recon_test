@@ -1,0 +1,659 @@
+{
+	"info": {
+		"_postman_id": "recon-api-collection",
+		"name": "Recon API - Audit Register",
+		"description": "財務系統 - 交易審計註冊對帳 API 測試集合\n\n包含所有 API 端點的測試案例，涵蓋正常流程、設備重啟、跨日期交易等場景。",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "recon-api"
+	},
+	"item": [
+		{
+			"name": "1. 基本請求",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"狀態碼為 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"響應碼為 SUCCESS\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.responseCode).to.eql(\"SUCCESS\");",
+							"});",
+							"",
+							"pm.test(\"響應包含成功訊息\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.responseMessage).to.include(\"Successfully processed\");",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					},
+					{
+						"key": "X-Client-Request-Identifier",
+						"value": "POSTMAN-TEST-001",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"auditRegisterTxns\": [\n    {\n      \"transactionType\": \"AUD001\",\n      \"transactionDateTime\": \"2024-01-15T10:30:00+08:00\",\n      \"deviceTypeId\": \"TYPE-001\",\n      \"equipmentId\": \"EQ-001\",\n      \"deviceSpecialMode\": \"NORMAL\",\n      \"deviceId\": \"DEVICE-001\",\n      \"serviceId\": \"SERVICE-001\",\n      \"beId\": 1,\n      \"auditRegisterSeqNum\": 1,\n      \"businessDate\": \"2024-01-15\",\n      \"auditRegisterEntries\": [\n        {\n          \"arTypeIdentifier\": \"AR-TYPE-001\",\n          \"cardMediaTypeId\": \"CARD-001\",\n          \"count\": 10,\n          \"value\": 1000.50\n        }\n      ]\n    }\n  ]\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{base_url}}/v1/ar/auditRegister",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"v1",
+						"ar",
+						"auditRegister"
+					]
+				},
+				"description": "測試基本的審計註冊請求，包含單筆交易和單一條目。"
+			},
+			"response": []
+		},
+		{
+			"name": "2. 多條目交易",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"狀態碼為 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"響應碼為 SUCCESS\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.responseCode).to.eql(\"SUCCESS\");",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					},
+					{
+						"key": "X-Client-Request-Identifier",
+						"value": "POSTMAN-TEST-002",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"auditRegisterTxns\": [\n    {\n      \"transactionType\": \"AUD001\",\n      \"transactionDateTime\": \"2024-01-15T10:30:00+08:00\",\n      \"deviceTypeId\": \"TYPE-001\",\n      \"equipmentId\": \"EQ-001\",\n      \"deviceSpecialMode\": \"NORMAL\",\n      \"deviceId\": \"DEVICE-001\",\n      \"serviceId\": \"SERVICE-001\",\n      \"beId\": 1,\n      \"auditRegisterSeqNum\": 1,\n      \"businessDate\": \"2024-01-15\",\n      \"auditRegisterEntries\": [\n        {\n          \"arTypeIdentifier\": \"AR-TYPE-001\",\n          \"cardMediaTypeId\": \"CARD-001\",\n          \"count\": 10,\n          \"value\": 1000.00\n        },\n        {\n          \"arTypeIdentifier\": \"AR-TYPE-002\",\n          \"cardMediaTypeId\": \"CARD-002\",\n          \"count\": 5,\n          \"value\": 500.00\n        },\n        {\n          \"arTypeIdentifier\": \"AR-TYPE-001\",\n          \"cardMediaTypeId\": \"CARD-003\",\n          \"count\": 3,\n          \"value\": 300.00\n        }\n      ]\n    }\n  ]\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{base_url}}/v1/ar/auditRegister",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"v1",
+						"ar",
+						"auditRegister"
+					]
+				},
+				"description": "測試一筆交易包含多個條目的場景。"
+			},
+			"response": []
+		},
+		{
+			"name": "3. 批次處理",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"狀態碼為 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"響應碼為 SUCCESS\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.responseCode).to.eql(\"SUCCESS\");",
+							"});",
+							"",
+							"pm.test(\"處理了 3 筆交易\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.responseMessage).to.include(\"3 transaction\");",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					},
+					{
+						"key": "X-Client-Request-Identifier",
+						"value": "POSTMAN-TEST-003",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"auditRegisterTxns\": [\n    {\n      \"transactionType\": \"AUD001\",\n      \"transactionDateTime\": \"2024-01-15T10:30:00+08:00\",\n      \"deviceTypeId\": \"TYPE-001\",\n      \"equipmentId\": \"EQ-001\",\n      \"deviceSpecialMode\": \"NORMAL\",\n      \"deviceId\": \"DEVICE-001\",\n      \"serviceId\": \"SERVICE-001\",\n      \"beId\": 1,\n      \"auditRegisterSeqNum\": 1,\n      \"businessDate\": \"2024-01-15\",\n      \"auditRegisterEntries\": [\n        {\n          \"arTypeIdentifier\": \"AR-TYPE-001\",\n          \"cardMediaTypeId\": \"CARD-001\",\n          \"count\": 10,\n          \"value\": 1000.00\n        }\n      ]\n    },\n    {\n      \"transactionType\": \"AUD001\",\n      \"transactionDateTime\": \"2024-01-15T11:00:00+08:00\",\n      \"deviceTypeId\": \"TYPE-001\",\n      \"equipmentId\": \"EQ-002\",\n      \"deviceSpecialMode\": \"NORMAL\",\n      \"deviceId\": \"DEVICE-002\",\n      \"serviceId\": \"SERVICE-001\",\n      \"beId\": 1,\n      \"auditRegisterSeqNum\": 1,\n      \"businessDate\": \"2024-01-15\",\n      \"auditRegisterEntries\": [\n        {\n          \"arTypeIdentifier\": \"AR-TYPE-001\",\n          \"cardMediaTypeId\": \"CARD-001\",\n          \"count\": 20,\n          \"value\": 2000.00\n        }\n      ]\n    },\n    {\n      \"transactionType\": \"AUD001\",\n      \"transactionDateTime\": \"2024-01-15T11:30:00+08:00\",\n      \"deviceTypeId\": \"TYPE-001\",\n      \"equipmentId\": \"EQ-003\",\n      \"deviceSpecialMode\": \"NORMAL\",\n      \"deviceId\": \"DEVICE-003\",\n      \"serviceId\": \"SERVICE-001\",\n      \"beId\": 1,\n      \"auditRegisterSeqNum\": 1,\n      \"businessDate\": \"2024-01-15\",\n      \"auditRegisterEntries\": [\n        {\n          \"arTypeIdentifier\": \"AR-TYPE-001\",\n          \"cardMediaTypeId\": \"CARD-001\",\n          \"count\": 15,\n          \"value\": 1500.00\n        }\n      ]\n    }\n  ]\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{base_url}}/v1/ar/auditRegister",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"v1",
+						"ar",
+						"auditRegister"
+					]
+				},
+				"description": "測試批次處理多筆交易的場景。"
+			},
+			"response": []
+		},
+		{
+			"name": "4. 設備重啟場景",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"// 先發送一筆正常交易 (seqNum=1)",
+							"pm.sendRequest({\n    url: pm.variables.get(\"base_url\") + \"/v1/ar/auditRegister\",\n    method: 'POST',\n    header: {\n        'Content-Type': 'application/json',\n        'X-Client-Request-Identifier': 'POSTMAN-TEST-004-PRE'\n    },\n    body: {\n        mode: 'raw',\n        raw: JSON.stringify({\n            auditRegisterTxns: [{\n                transactionType: \"AUD001\",\n                transactionDateTime: \"2024-01-15T10:00:00+08:00\",\n                deviceId: \"DEVICE-001\",\n                equipmentId: \"EQ-001\",\n                beId: 1,\n                auditRegisterSeqNum: 1,\n                businessDate: \"2024-01-15\",\n                auditRegisterEntries: [{\n                    arTypeIdentifier: \"AR-TYPE-001\",\n                    cardMediaTypeId: \"CARD-001\",\n                    count: 10,\n                    value: 1000.00\n                }]\n            }]\n        })\n    }\n}, function (err, res) {\n    console.log('Pre-request completed');\n});",
+							"",
+							"// 再發送一筆序列號更大的交易 (seqNum=2)",
+							"pm.sendRequest({\n    url: pm.variables.get(\"base_url\") + \"/v1/ar/auditRegister\",\n    method: 'POST',\n    header: {\n        'Content-Type': 'application/json',\n        'X-Client-Request-Identifier': 'POSTMAN-TEST-004-PRE2'\n    },\n    body: {\n        mode: 'raw',\n        raw: JSON.stringify({\n            auditRegisterTxns: [{\n                transactionType: \"AUD001\",\n                transactionDateTime: \"2024-01-15T10:15:00+08:00\",\n                deviceId: \"DEVICE-001\",\n                equipmentId: \"EQ-001\",\n                beId: 1,\n                auditRegisterSeqNum: 2,\n                businessDate: \"2024-01-15\",\n                auditRegisterEntries: [{\n                    arTypeIdentifier: \"AR-TYPE-001\",\n                    cardMediaTypeId: \"CARD-001\",\n                    count: 15,\n                    value: 1500.00\n                }]\n            }]\n        })\n    }\n}, function (err, res) {\n    console.log('Pre-request 2 completed');\n});"
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"狀態碼為 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"響應碼為 SUCCESS\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.responseCode).to.eql(\"SUCCESS\");",
+							"});",
+							"",
+							"pm.test(\"設備重啟後請求成功處理\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.responseCode).to.eql(\"SUCCESS\");",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					},
+					{
+						"key": "X-Client-Request-Identifier",
+						"value": "POSTMAN-TEST-004",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"auditRegisterTxns\": [\n    {\n      \"transactionType\": \"AUD001\",\n      \"transactionDateTime\": \"2024-01-15T14:00:00+08:00\",\n      \"deviceTypeId\": \"TYPE-001\",\n      \"equipmentId\": \"EQ-001\",\n      \"deviceSpecialMode\": \"NORMAL\",\n      \"deviceId\": \"DEVICE-001\",\n      \"serviceId\": \"SERVICE-001\",\n      \"beId\": 1,\n      \"auditRegisterSeqNum\": 1,\n      \"businessDate\": \"2024-01-15\",\n      \"auditRegisterEntries\": [\n        {\n          \"arTypeIdentifier\": \"AR-TYPE-001\",\n          \"cardMediaTypeId\": \"CARD-001\",\n          \"count\": 5,\n          \"value\": 500.00\n        }\n      ]\n    }\n  ]\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{base_url}}/v1/ar/auditRegister",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"v1",
+						"ar",
+						"auditRegister"
+					]
+				},
+				"description": "測試設備重啟場景。\n\n場景說明：\n1. 先發送 seqNum=1 的交易（計數=10）\n2. 再發送 seqNum=2 的交易（計數=15）\n3. 設備重啟後，發送 seqNum=1 的交易（計數=5）\n\n系統應該檢測到設備重啟，並正確累計計數（總計=30）。"
+			},
+			"response": []
+		},
+		{
+			"name": "5. 跨日期交易",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"狀態碼為 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"響應碼為 SUCCESS\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.responseCode).to.eql(\"SUCCESS\");",
+							"});",
+							"",
+							"pm.test(\"跨日期交易成功處理\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.responseCode).to.eql(\"SUCCESS\");",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					},
+					{
+						"key": "X-Client-Request-Identifier",
+						"value": "POSTMAN-TEST-005",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"auditRegisterTxns\": [\n    {\n      \"transactionType\": \"AUD001\",\n      \"transactionDateTime\": \"2024-01-16T08:00:00+08:00\",\n      \"deviceTypeId\": \"TYPE-001\",\n      \"equipmentId\": \"EQ-001\",\n      \"deviceSpecialMode\": \"NORMAL\",\n      \"deviceId\": \"DEVICE-001\",\n      \"serviceId\": \"SERVICE-001\",\n      \"beId\": 1,\n      \"auditRegisterSeqNum\": 1,\n      \"businessDate\": \"2024-01-15\",\n      \"auditRegisterEntries\": [\n        {\n          \"arTypeIdentifier\": \"AR-TYPE-001\",\n          \"cardMediaTypeId\": \"CARD-001\",\n          \"count\": 5,\n          \"value\": 500.00\n        }\n      ]\n    }\n  ]\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{base_url}}/v1/ar/auditRegister",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"v1",
+						"ar",
+						"auditRegister"
+					]
+				},
+				"description": "測試跨日期交易場景。\n\n場景說明：\n- 業務日期是昨天（2024-01-15）\n- 但交易在今天（2024-01-16）發送\n- 系統應該將交易累計到業務日期（昨天）的摘要中"
+			},
+			"response": []
+		},
+		{
+			"name": "6. 驗證錯誤 - 缺少必填欄位",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"狀態碼為 400\", function () {",
+							"    pm.response.to.have.status(400);",
+							"});",
+							"",
+							"pm.test(\"響應碼為 VALIDATION_ERROR\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.responseCode).to.eql(\"VALIDATION_ERROR\");",
+							"});",
+							"",
+							"pm.test(\"包含錯誤訊息\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.errors).to.be.an('array');",
+							"    pm.expect(jsonData.errors.length).to.be.above(0);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					},
+					{
+						"key": "X-Client-Request-Identifier",
+						"value": "POSTMAN-TEST-006",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"auditRegisterTxns\": [\n    {\n      \"transactionType\": null,\n      \"transactionDateTime\": \"2024-01-15T10:30:00+08:00\",\n      \"deviceId\": null,\n      \"equipmentId\": \"EQ-001\",\n      \"beId\": null,\n      \"auditRegisterSeqNum\": 1,\n      \"businessDate\": \"2024-01-15\",\n      \"auditRegisterEntries\": [\n        {\n          \"arTypeIdentifier\": \"AR-TYPE-001\",\n          \"count\": 10,\n          \"value\": 1000.50\n        }\n      ]\n    }\n  ]\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{base_url}}/v1/ar/auditRegister",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"v1",
+						"ar",
+						"auditRegister"
+					]
+				},
+				"description": "測試驗證錯誤場景 - 缺少必填欄位（transactionType, deviceId, beId）。"
+			},
+			"response": []
+		},
+		{
+			"name": "7. 驗證錯誤 - 空交易列表",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"狀態碼為 400\", function () {",
+							"    pm.response.to.have.status(400);",
+							"});",
+							"",
+							"pm.test(\"響應碼為 VALIDATION_ERROR\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.responseCode).to.eql(\"VALIDATION_ERROR\");",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					},
+					{
+						"key": "X-Client-Request-Identifier",
+						"value": "POSTMAN-TEST-007",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"auditRegisterTxns\": []\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{base_url}}/v1/ar/auditRegister",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"v1",
+						"ar",
+						"auditRegister"
+					]
+				},
+				"description": "測試驗證錯誤場景 - 空交易列表。"
+			},
+			"response": []
+		},
+		{
+			"name": "8. 驗證錯誤 - 空條目列表",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"狀態碼為 400\", function () {",
+							"    pm.response.to.have.status(400);",
+							"});",
+							"",
+							"pm.test(\"響應碼為 VALIDATION_ERROR\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.responseCode).to.eql(\"VALIDATION_ERROR\");",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					},
+					{
+						"key": "X-Client-Request-Identifier",
+						"value": "POSTMAN-TEST-008",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"auditRegisterTxns\": [\n    {\n      \"transactionType\": \"AUD001\",\n      \"transactionDateTime\": \"2024-01-15T10:30:00+08:00\",\n      \"deviceTypeId\": \"TYPE-001\",\n      \"equipmentId\": \"EQ-001\",\n      \"deviceSpecialMode\": \"NORMAL\",\n      \"deviceId\": \"DEVICE-001\",\n      \"serviceId\": \"SERVICE-001\",\n      \"beId\": 1,\n      \"auditRegisterSeqNum\": 1,\n      \"businessDate\": \"2024-01-15\",\n      \"auditRegisterEntries\": []\n    }\n  ]\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{base_url}}/v1/ar/auditRegister",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"v1",
+						"ar",
+						"auditRegister"
+					]
+				},
+				"description": "測試驗證錯誤場景 - 空條目列表。"
+			},
+			"response": []
+		},
+		{
+			"name": "9. 無效 JSON",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"狀態碼為 400\", function () {",
+							"    pm.response.to.have.status(400);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					},
+					{
+						"key": "X-Client-Request-Identifier",
+						"value": "POSTMAN-TEST-009",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{ invalid json }",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{base_url}}/v1/ar/auditRegister",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"v1",
+						"ar",
+						"auditRegister"
+					]
+				},
+				"description": "測試無效 JSON 格式的錯誤處理。"
+			},
+			"response": []
+		},
+		{
+			"name": "10. 缺少 Content-Type 標頭",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"狀態碼為 415 或 400\", function () {",
+							"    pm.expect(pm.response.code).to.be.oneOf([400, 415]);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "X-Client-Request-Identifier",
+						"value": "POSTMAN-TEST-010",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"auditRegisterTxns\": [\n    {\n      \"transactionType\": \"AUD001\",\n      \"transactionDateTime\": \"2024-01-15T10:30:00+08:00\",\n      \"deviceId\": \"DEVICE-001\",\n      \"equipmentId\": \"EQ-001\",\n      \"beId\": 1,\n      \"auditRegisterSeqNum\": 1,\n      \"businessDate\": \"2024-01-15\",\n      \"auditRegisterEntries\": [\n        {\n          \"arTypeIdentifier\": \"AR-TYPE-001\",\n          \"count\": 10,\n          \"value\": 1000.50\n        }\n      ]\n    }\n  ]\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{base_url}}/v1/ar/auditRegister",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"v1",
+						"ar",
+						"auditRegister"
+					]
+				},
+				"description": "測試缺少 Content-Type 標頭的錯誤處理。"
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					"// 設置動態日期（如果需要）",
+					"const today = new Date();",
+					"const yesterday = new Date(today);",
+					"yesterday.setDate(yesterday.getDate() - 1);",
+					"",
+					"// 格式化日期為 YYYY-MM-DD",
+					"function formatDate(date) {",
+					"    const year = date.getFullYear();",
+					"    const month = String(date.getMonth() + 1).padStart(2, '0');",
+					"    const day = String(date.getDate()).padStart(2, '0');",
+					"    return `${year}-${month}-${day}`;",
+					"}",
+					"",
+					"// 設置環境變數（如果需要動態日期）",
+					"// pm.environment.set('today', formatDate(today));",
+					"// pm.environment.set('yesterday', formatDate(yesterday));"
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					"// 全局測試腳本",
+					"// 可以在這裡添加通用的測試邏輯"
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://localhost:8080",
+			"type": "string"
+		}
+	]
+}
+
