@@ -1,0 +1,25 @@
+{
+  "auditRegisterTxns": [
+    {
+      "transactionType": "AUD001",
+      "transactionDateTime": "2024-01-15T14:00:00+08:00",
+      "deviceTypeId": "TYPE-001",
+      "equipmentId": "EQ-001",
+      "deviceSpecialMode": "NORMAL",
+      "deviceId": "DEVICE-001",
+      "serviceId": "SERVICE-001",
+      "beId": 1,
+      "auditRegisterSeqNum": 1,
+      "businessDate": "2024-01-15",
+      "auditRegisterEntries": [
+        {
+          "arTypeIdentifier": "AR-TYPE-001",
+          "cardMediaTypeId": "CARD-001",
+          "count": 5,
+          "value": 500.00
+        }
+      ]
+    }
+  ]
+}
+

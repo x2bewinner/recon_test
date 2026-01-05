@@ -1,0 +1,65 @@
+{
+  "auditRegisterTxns": [
+    {
+      "transactionType": "AUD001",
+      "transactionDateTime": "2024-01-15T10:30:00+08:00",
+      "deviceTypeId": "TYPE-001",
+      "equipmentId": "EQ-001",
+      "deviceSpecialMode": "NORMAL",
+      "deviceId": "DEVICE-001",
+      "serviceId": "SERVICE-001",
+      "beId": 1,
+      "auditRegisterSeqNum": 1,
+      "businessDate": "2024-01-15",
+      "auditRegisterEntries": [
+        {
+          "arTypeIdentifier": "AR-TYPE-001",
+          "cardMediaTypeId": "CARD-001",
+          "count": 10,
+          "value": 1000.00
+        }
+      ]
+    },
+    {
+      "transactionType": "AUD001",
+      "transactionDateTime": "2024-01-15T11:00:00+08:00",
+      "deviceTypeId": "TYPE-001",
+      "equipmentId": "EQ-002",
+      "deviceSpecialMode": "NORMAL",
+      "deviceId": "DEVICE-002",
+      "serviceId": "SERVICE-001",
+      "beId": 1,
+      "auditRegisterSeqNum": 1,
+      "businessDate": "2024-01-15",
+      "auditRegisterEntries": [
+        {
+          "arTypeIdentifier": "AR-TYPE-001",
+          "cardMediaTypeId": "CARD-001",
+          "count": 20,
+          "value": 2000.00
+        }
+      ]
+    },
+    {
+      "transactionType": "AUD001",
+      "transactionDateTime": "2024-01-15T11:30:00+08:00",
+      "deviceTypeId": "TYPE-001",
+      "equipmentId": "EQ-003",
+      "deviceSpecialMode": "NORMAL",
+      "deviceId": "DEVICE-003",
+      "serviceId": "SERVICE-001",
+      "beId": 1,
+      "auditRegisterSeqNum": 1,
+      "businessDate": "2024-01-15",
+      "auditRegisterEntries": [
+        {
+          "arTypeIdentifier": "AR-TYPE-001",
+          "cardMediaTypeId": "CARD-001",
+          "count": 15,
+          "value": 1500.00
+        }
+      ]
+    }
+  ]
+}
+
