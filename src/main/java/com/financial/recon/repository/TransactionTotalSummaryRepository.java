@@ -1,47 +1,50 @@
 package com.financial.recon.repository;
 
-import org.springframework.data.jpa.repository.Modifying;
+import com.financial.recon.entity.TransactionTotal;
+import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
-import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.List;
 
 /**
  * Transaction Total Summary Repository Interface
- * Used to calculate transaction total by executing a native SQL INSERT...SELECT
+ * Used to calculate transaction total via separate find and insert operations.
  */
 @Repository
-public interface TransactionTotalSummaryRepository {
+public interface TransactionTotalSummaryRepository extends JpaRepository<TransactionTotal, Long> {
 
     /**
-     * Insert aggregated transaction totals into TRANSACTION_TOTAL table
-     * based on data from MIRROR_RAW_TXN for the given settlement date.
+     * Projection for aggregated transaction totals from MIRROR_RAW_TXN.
+     */
+    interface TransactionTotalAggregate {
+        LocalDate getSettlementDate();
+        String getTxnType();
+        String getTxnSubtype();
+        Integer getBeId();
+        Integer getDebtorBeId();
+        Integer getCreditorBeId();
+        String getIssuerId();
+        String getDeviceId();
+        Long getUdSettleCount();
+        BigDecimal getUdSettleAmount();
+        Long getUdNotSettleCount();
+        BigDecimal getUdNotSettleAmount();
+        LocalDate getBeBusinessDate();
+        String getProductCode();
+        BigDecimal getApportionmentValue();
+    }
+
+    /**
+     * Find aggregated transaction totals from MIRROR_RAW_TXN for the given settlement date.
      *
      * @param settlementDate Settlement date
-     * @return number of rows inserted
+     * @return list of aggregated transaction totals
      */
-    @Modifying
-    @Transactional
     @Query(value = """
-            INSERT INTO TRANSACTION_TOTAL (
-                SETTLEMENT_DATE,
-                TXN_TYPE,
-                TXN_SUBTYPE,
-                BE_ID,
-                DEBTOR_BE_ID,
-                CREDITOR_BE_ID,
-                ISSUER_ID,
-                DEVICE_ID,
-                UD_SETTLE_COUNT,
-                UD_SETTLE_AMOUNT,
-                UD_NOT_SETTLE_COUNT,
-                UD_NOT_SETTLE_AMOUNT,
-                BE_BUSINESS_DATE,
-                PRODUCT_CODE,
-                APPORTIONMENT_VALUE
-            )
             SELECT 
                 SETTLEMENT_DATE,
                 TXN_TYPE,
@@ -63,6 +66,9 @@ public interface TransactionTotalSummaryRepository {
             GROUP BY DEVICE_ID, TXN_TYPE, TXN_SUBTYPE, BE_BUSINESS_DATE, SETTLEMENT_DATE,
                      BE_ID, DEBTOR_BE_ID, CREDITOR_BE_ID, ISSUER_ID, PRODUCT_CODE, APPORTIONMENT_VALUE
             """, nativeQuery = true)
-    int insertTransactionTotals(@Param("settlementDate") LocalDate settlementDate);
+    List<TransactionTotalAggregate> findTransactionTotalAggregates(
+            @Param("settlementDate") LocalDate settlementDate);
+
 }
+
 
