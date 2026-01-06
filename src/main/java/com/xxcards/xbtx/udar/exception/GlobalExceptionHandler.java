@@ -1,5 +1,6 @@
 package com.xxcards.xbtx.udar.exception;
 
+import com.xxcards.xbtx.udar.constant.LogMessage;
 import com.xxcards.xbtx.udar.dto.AuditRegisterResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -30,7 +31,7 @@ public class GlobalExceptionHandler {
                 })
                 .collect(Collectors.toList());
 
-        log.warn("Validation errors: {}", errors);
+        log.warn(LogMessage.EXCEPTION_VALIDATION_ERRORS.getMessage(), errors);
 
         AuditRegisterResponse response = AuditRegisterResponse.builder()
                 .responseCode("VALIDATION_ERROR")
@@ -43,7 +44,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<AuditRegisterResponse> handleGenericException(Exception ex) {
-        log.error("Unexpected error occurred", ex);
+        log.error(LogMessage.E_EXCEPTION_UNEXPECTED_ERROR.getMessage(), ex);
 
         AuditRegisterResponse response = AuditRegisterResponse.builder()
                 .responseCode("ERROR")

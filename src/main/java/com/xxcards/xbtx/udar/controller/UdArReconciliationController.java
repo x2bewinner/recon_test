@@ -1,5 +1,6 @@
 package com.xxcards.xbtx.udar.controller;
 
+import com.xxcards.xbtx.udar.constant.LogMessage;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.batch.core.Job;
@@ -43,10 +44,10 @@ public class UdArReconciliationController {
             // If settlement date not provided, use current date
             if (settlementDate == null) {
                 settlementDate = LocalDate.now();
-                log.info("Settlement date not provided, using current date: {}", settlementDate);
+                log.info(LogMessage.I_CONTROLLER_SETTLEMENT_DATE_NOT_PROVIDED.getMessage(), settlementDate);
             }
             
-            log.info("Starting to trigger UD AR reconciliation batch job, settlement date: {}", settlementDate);
+            log.info(LogMessage.I_CONTROLLER_TRIGGER_UD_AR_RECONCILIATION.getMessage(), settlementDate);
             
             // Create Job parameters, use timestamp to ensure each execution is a new Job Instance
             JobParameters jobParameters = new JobParametersBuilder()
@@ -60,12 +61,12 @@ public class UdArReconciliationController {
             response.put("status", "SUCCESS");
             response.put("message", "UD AR reconciliation batch job started successfully");
             response.put("settlementDate", settlementDate.toString());
-            log.info("UD AR reconciliation batch job started successfully, settlement date: {}", settlementDate);
+            log.info(LogMessage.I_CONTROLLER_UD_AR_BATCH_JOB_STARTED_SUCCESS.getMessage(), settlementDate);
             
             return ResponseEntity.ok(response);
             
         } catch (Exception e) {
-            log.error("Exception occurred while starting UD AR reconciliation batch job, settlement date: {}", settlementDate, e);
+            log.error(LogMessage.E_CONTROLLER_UD_AR_BATCH_JOB_START_ERROR.getMessage(), settlementDate, e);
             response.put("status", "ERROR");
             response.put("message", "Failed to start UD AR reconciliation batch job: " + e.getMessage());
             return ResponseEntity.status(500).body(response);

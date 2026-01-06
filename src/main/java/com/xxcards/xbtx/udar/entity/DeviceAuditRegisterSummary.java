@@ -11,9 +11,9 @@ import java.time.LocalDate;
 import java.time.OffsetDateTime;
 
 /**
- * 設備審計註冊摘要表
- * 用於追蹤每個設備在每個業務日期的累計交易計數和金額
- * 處理設備重啟後計數重置的情況
+ * Device Audit Register Summary table
+ * Used to track accumulated transaction count and amount for each device on each business date
+ * Handles device restart count reset scenario
  */
 @Entity
 @Table(name = "DEVICE_AR_SUMMARY", 

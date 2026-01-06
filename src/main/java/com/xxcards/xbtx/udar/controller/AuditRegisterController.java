@@ -1,5 +1,6 @@
 package com.xxcards.xbtx.udar.controller;
 
+import com.xxcards.xbtx.udar.constant.LogMessage;
 import com.xxcards.xbtx.udar.dto.AuditRegisterRequest;
 import com.xxcards.xbtx.udar.dto.AuditRegisterResponse;
 import com.xxcards.xbtx.udar.service.AuditRegisterService;
@@ -23,7 +24,7 @@ public class AuditRegisterController {
             @RequestHeader(value = "X-Client-Request-Identifier", required = false) String clientRequestId,
             @Valid @RequestBody AuditRegisterRequest request) {
         
-        log.info("Received audit register request. ClientRequestId: {}, TransactionCount: {}", 
+        log.info(LogMessage.I_CONTROLLER_AUDIT_REGISTER_RECEIVED.getMessage(), 
                 clientRequestId, request.getAuditRegisterTxns().size());
 
         AuditRegisterResponse response = auditRegisterService.processAuditRegister(

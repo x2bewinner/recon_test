@@ -24,7 +24,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
 @Transactional
-@DisplayName("審計註冊控制器測試")
+@DisplayName("Audit Register Controller Test")
 class AuditRegisterControllerTest {
 
     @Autowired
@@ -35,11 +35,11 @@ class AuditRegisterControllerTest {
 
     @BeforeEach
     void setUp() {
-        // 測試資料會在每個測試方法中創建
+        // Test data will be created in each test method
     }
 
     @Test
-    @DisplayName("測試基本 API 請求 - 應該返回成功響應")
+    @DisplayName("Test basic API request - should return success response")
     void testBasicApiRequest() throws Exception {
         // Given
         AuditRegisterRequest request = TestDataBuilder.createBasicRequest();
@@ -56,7 +56,7 @@ class AuditRegisterControllerTest {
                 .andExpect(jsonPath("$.errors").doesNotExist())
                 .andReturn();
 
-        // 驗證響應內容
+        // Verify response content
         String responseContent = result.getResponse().getContentAsString();
         AuditRegisterResponse response = objectMapper.readValue(responseContent, AuditRegisterResponse.class);
         assertEquals("SUCCESS", response.getResponseCode());
@@ -64,7 +64,7 @@ class AuditRegisterControllerTest {
     }
 
     @Test
-    @DisplayName("測試缺少必填欄位的請求 - 應該返回驗證錯誤")
+    @DisplayName("Test request with missing required fields - should return validation error")
     void testValidationError() throws Exception {
         // Given
         AuditRegisterRequest request = TestDataBuilder.createInvalidRequest();
@@ -80,7 +80,7 @@ class AuditRegisterControllerTest {
     }
 
     @Test
-    @DisplayName("測試空交易列表 - 應該返回驗證錯誤")
+    @DisplayName("Test empty transaction list - should return validation error")
     void testEmptyTransactionList() throws Exception {
         // Given
         AuditRegisterRequest request = new AuditRegisterRequest();
@@ -96,7 +96,7 @@ class AuditRegisterControllerTest {
     }
 
     @Test
-    @DisplayName("測試空條目列表 - 應該返回驗證錯誤")
+    @DisplayName("Test empty entries list - should return validation error")
     void testEmptyEntriesList() throws Exception {
         // Given
         AuditRegisterRequest request = TestDataBuilder.createEmptyEntriesRequest();
@@ -111,7 +111,7 @@ class AuditRegisterControllerTest {
     }
 
     @Test
-    @DisplayName("測試批次處理 - 應該成功處理多筆交易")
+    @DisplayName("Test batch processing - should successfully process multiple transactions")
     void testBatchProcessing() throws Exception {
         // Given
         AuditRegisterRequest request = TestDataBuilder.createBatchRequest(3);
@@ -127,7 +127,7 @@ class AuditRegisterControllerTest {
     }
 
     @Test
-    @DisplayName("測試多條目交易 - 應該成功處理")
+    @DisplayName("Test multi-entry transaction - should successfully process")
     void testMultiEntryTransaction() throws Exception {
         // Given
         AuditRegisterRequest request = TestDataBuilder.createMultiEntryRequest();
@@ -142,7 +142,7 @@ class AuditRegisterControllerTest {
     }
 
     @Test
-    @DisplayName("測試可選標頭 - 沒有 X-Client-Request-Identifier 也應該成功")
+    @DisplayName("Test optional header - should succeed without X-Client-Request-Identifier")
     void testOptionalHeader() throws Exception {
         // Given
         AuditRegisterRequest request = TestDataBuilder.createBasicRequest();
@@ -157,10 +157,10 @@ class AuditRegisterControllerTest {
     }
 
     @Test
-    @DisplayName("測試設備重啟場景 - 應該成功處理")
+    @DisplayName("Test device restart scenario - should successfully process")
     void testDeviceRestartScenario() throws Exception {
         // Given
-        // 先發送一筆正常交易
+        // First send a normal transaction
         AuditRegisterRequest request1 = TestDataBuilder.createBasicRequest();
         String requestJson1 = objectMapper.writeValueAsString(request1);
         mockMvc.perform(post("/v1/ar/auditRegister")
@@ -168,7 +168,7 @@ class AuditRegisterControllerTest {
                         .content(requestJson1))
                 .andExpect(status().isOk());
 
-        // 再發送一筆序列號更大的交易
+        // Then send a transaction with larger sequence number
         AuditRegisterRequest request2 = TestDataBuilder.createRequestForDeviceAndDate(
                 "DEVICE-001", java.time.LocalDate.now(), 2);
         String requestJson2 = objectMapper.writeValueAsString(request2);
@@ -177,7 +177,7 @@ class AuditRegisterControllerTest {
                         .content(requestJson2))
                 .andExpect(status().isOk());
 
-        // 設備重啟後，序列號重置為 1
+        // After device restart, sequence number reset to 1
         AuditRegisterRequest request3 = TestDataBuilder.createRequestForDeviceAndDate(
                 "DEVICE-001", java.time.LocalDate.now(), 1);
         String requestJson3 = objectMapper.writeValueAsString(request3);
@@ -191,7 +191,7 @@ class AuditRegisterControllerTest {
     }
 
     @Test
-    @DisplayName("測試跨日期交易 - 應該成功處理")
+    @DisplayName("Test cross-date transaction - should successfully process")
     void testCrossDateTransaction() throws Exception {
         // Given
         AuditRegisterRequest request = TestDataBuilder.createCrossDateRequest();
@@ -206,7 +206,7 @@ class AuditRegisterControllerTest {
     }
 
     @Test
-    @DisplayName("測試無效 JSON - 應該返回錯誤")
+    @DisplayName("Test invalid JSON - should return error")
     void testInvalidJson() throws Exception {
         // Given
         String invalidJson = "{ invalid json }";
@@ -219,7 +219,7 @@ class AuditRegisterControllerTest {
     }
 
     @Test
-    @DisplayName("測試缺少 Content-Type - 應該返回錯誤")
+    @DisplayName("Test missing Content-Type - should return error")
     void testMissingContentType() throws Exception {
         // Given
         AuditRegisterRequest request = TestDataBuilder.createBasicRequest();

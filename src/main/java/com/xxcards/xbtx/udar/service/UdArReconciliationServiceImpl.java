@@ -1,5 +1,6 @@
 package com.xxcards.xbtx.udar.service;
 
+import com.xxcards.xbtx.udar.constant.LogMessage;
 import com.xxcards.xbtx.udar.entity.UdArReconciliation;
 import com.xxcards.xbtx.udar.repository.UdArReconciliationRepository;
 import lombok.RequiredArgsConstructor;
@@ -23,12 +24,12 @@ public class UdArReconciliationServiceImpl implements UdArReconciliationService 
     @Transactional
     public boolean executeReconciliation(LocalDate settlementDate) {
         try {
-            log.info("Service: Starting UD AR reconciliation, settlement date: {}", settlementDate);
+            log.info(LogMessage.I_SERVICE_UD_AR_RECONCILIATION_START.getMessage(), settlementDate);
             List<UdArReconciliationRepository.UdArReconciliationAggregate> aggregates =
                     udArReconciliationRepository.findUdArReconciliationAggregates(settlementDate);
 
             if (aggregates.isEmpty()) {
-                log.warn("Service: No UD AR reconciliation data found for settlement date: {}", settlementDate);
+                log.warn(LogMessage.SERVICE_UD_AR_RECONCILIATION_NOT_FOUND.getMessage(), settlementDate);
                 return true; // No data is considered success
             }
 
@@ -57,16 +58,16 @@ public class UdArReconciliationServiceImpl implements UdArReconciliationService 
             boolean result = totalInserted == aggregates.size();
             
             if (result) {
-                log.info("Service: UD AR reconciliation succeeded, settlement date: {}, inserted rows: {}", settlementDate, totalInserted);
+                log.info(LogMessage.I_SERVICE_UD_AR_RECONCILIATION_SUCCESS.getMessage(), settlementDate, totalInserted);
             } else {
-                log.warn("Service: UD AR reconciliation partially failed, settlement date: {}, expected: {}, inserted: {}",
+                log.warn(LogMessage.SERVICE_UD_AR_RECONCILIATION_PARTIAL_FAIL.getMessage(),
                         settlementDate, aggregates.size(), totalInserted);
             }
             
             return result;
             
         } catch (Exception e) {
-            log.error("Service: Exception occurred during UD AR reconciliation, settlement date: {}", settlementDate, e);
+            log.error(LogMessage.E_SERVICE_UD_AR_RECONCILIATION_ERROR.getMessage(), settlementDate, e);
             throw new RuntimeException("Failed to execute UD AR reconciliation: " + e.getMessage(), e);
         }
     }

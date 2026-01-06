@@ -1,5 +1,6 @@
 package com.xxcards.xbtx.udar.service;
 
+import com.xxcards.xbtx.udar.constant.LogMessage;
 import com.xxcards.xbtx.udar.entity.TransactionTotal;
 import com.xxcards.xbtx.udar.repository.TransactionTotalSummaryRepository;
 import lombok.RequiredArgsConstructor;
@@ -22,12 +23,12 @@ public class TransactionTotalSummaryServiceImpl implements TransactionTotalSumma
     @Transactional
     public boolean calculateTransactionTotal(LocalDate settlementDate) {
         try {
-            log.info("Service: Starting transaction total calculation, settlement date: {}", settlementDate);
+            log.info(LogMessage.I_SERVICE_TRANSACTION_TOTAL_START.getMessage(), settlementDate);
             List<TransactionTotalSummaryRepository.TransactionTotalAggregate> aggregates =
                     transactionTotalSummaryRepository.findTransactionTotalAggregates(settlementDate);
 
             if (aggregates.isEmpty()) {
-                log.warn("Service: No transaction totals found for settlement date: {}", settlementDate);
+                log.warn(LogMessage.SERVICE_TRANSACTION_TOTAL_NOT_FOUND.getMessage(), settlementDate);
                 return true; // No data is considered success
             }
 
@@ -59,16 +60,16 @@ public class TransactionTotalSummaryServiceImpl implements TransactionTotalSumma
             boolean result = totalInserted == aggregates.size();
             
             if (result) {
-                log.info("Service: Transaction total calculation succeeded, settlement date: {}, inserted rows: {}", settlementDate, totalInserted);
+                log.info(LogMessage.I_SERVICE_TRANSACTION_TOTAL_SUCCESS.getMessage(), settlementDate, totalInserted);
             } else {
-                log.warn("Service: Transaction total calculation partially failed, settlement date: {}, expected: {}, inserted: {}",
+                log.warn(LogMessage.SERVICE_TRANSACTION_TOTAL_PARTIAL_FAIL.getMessage(),
                         settlementDate, aggregates.size(), totalInserted);
             }
             
             return result;
             
         } catch (Exception e) {
-            log.error("Service: Exception occurred during transaction total calculation, settlement date: {}", settlementDate, e);
+            log.error(LogMessage.E_SERVICE_TRANSACTION_TOTAL_ERROR.getMessage(), settlementDate, e);
             throw new RuntimeException("Failed to calculate transaction total: " + e.getMessage(), e);
         }
     }

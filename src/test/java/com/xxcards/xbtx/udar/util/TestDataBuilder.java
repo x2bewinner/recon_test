@@ -10,13 +10,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * 測試資料構建器
- * 用於創建測試用的請求物件
+ * Test data builder
+ * Used to create test request objects
  */
 public class TestDataBuilder {
 
     /**
-     * 創建基本的審計註冊請求
+     * Create basic audit register request
      */
     public static AuditRegisterRequest createBasicRequest() {
         AuditRegisterRequest request = new AuditRegisterRequest();
@@ -30,7 +30,7 @@ public class TestDataBuilder {
     }
 
     /**
-     * 創建基本的交易物件
+     * Create basic transaction object
      */
     public static AuditRegisterTransaction createBasicTransaction() {
         AuditRegisterTransaction txn = new AuditRegisterTransaction();
@@ -54,7 +54,7 @@ public class TestDataBuilder {
     }
 
     /**
-     * 創建基本的條目物件
+     * Create basic entry object
      */
     public static AuditRegisterEntry createBasicEntry() {
         AuditRegisterEntry entry = new AuditRegisterEntry();
@@ -66,14 +66,14 @@ public class TestDataBuilder {
     }
 
     /**
-     * 創建設備重啟場景的請求（seqNum 小於之前的值）
+     * Create device restart scenario request (seqNum less than previous value)
      */
     public static AuditRegisterRequest createDeviceRestartRequest() {
         AuditRegisterRequest request = new AuditRegisterRequest();
         List<AuditRegisterTransaction> transactions = new ArrayList<>();
         
         AuditRegisterTransaction txn = createBasicTransaction();
-        txn.setAuditRegisterSeqNum(1); // 設備重啟後序列號重置為 1
+        txn.setAuditRegisterSeqNum(1); // Sequence number reset to 1 after device restart
         txn.setBusinessDate(LocalDate.now());
         
         List<AuditRegisterEntry> entries = new ArrayList<>();
@@ -90,15 +90,15 @@ public class TestDataBuilder {
     }
 
     /**
-     * 創建跨日期交易請求（業務日期是昨天）
+     * Create cross-date transaction request (business date is yesterday)
      */
     public static AuditRegisterRequest createCrossDateRequest() {
         AuditRegisterRequest request = new AuditRegisterRequest();
         List<AuditRegisterTransaction> transactions = new ArrayList<>();
         
         AuditRegisterTransaction txn = createBasicTransaction();
-        txn.setBusinessDate(LocalDate.now().minusDays(1)); // 業務日期是昨天
-        txn.setTransactionDateTime(OffsetDateTime.now()); // 但發送時間是今天
+        txn.setBusinessDate(LocalDate.now().minusDays(1)); // Business date is yesterday
+        txn.setTransactionDateTime(OffsetDateTime.now()); // but send time is today
         
         List<AuditRegisterEntry> entries = new ArrayList<>();
         AuditRegisterEntry entry = createBasicEntry();
@@ -114,7 +114,7 @@ public class TestDataBuilder {
     }
 
     /**
-     * 創建批次處理請求（多筆交易）
+     * Create batch processing request (multiple transactions)
      */
     public static AuditRegisterRequest createBatchRequest(int transactionCount) {
         AuditRegisterRequest request = new AuditRegisterRequest();
@@ -132,7 +132,7 @@ public class TestDataBuilder {
     }
 
     /**
-     * 創建多條目交易請求
+     * Create multi-entry transaction request
      */
     public static AuditRegisterRequest createMultiEntryRequest() {
         AuditRegisterRequest request = new AuditRegisterRequest();
@@ -142,7 +142,7 @@ public class TestDataBuilder {
         
         List<AuditRegisterEntry> entries = new ArrayList<>();
         
-        // 第一個條目
+        // First entry
         AuditRegisterEntry entry1 = createBasicEntry();
         entry1.setArTypeIdentifier("AR-TYPE-001");
         entry1.setCardMediaTypeId("CARD-001");
@@ -150,7 +150,7 @@ public class TestDataBuilder {
         entry1.setValue(1000.00);
         entries.add(entry1);
         
-        // 第二個條目
+        // Second entry
         AuditRegisterEntry entry2 = createBasicEntry();
         entry2.setArTypeIdentifier("AR-TYPE-002");
         entry2.setCardMediaTypeId("CARD-002");
@@ -158,7 +158,7 @@ public class TestDataBuilder {
         entry2.setValue(500.00);
         entries.add(entry2);
         
-        // 第三個條目
+        // Third entry
         AuditRegisterEntry entry3 = createBasicEntry();
         entry3.setArTypeIdentifier("AR-TYPE-001");
         entry3.setCardMediaTypeId("CARD-003");
@@ -174,14 +174,14 @@ public class TestDataBuilder {
     }
 
     /**
-     * 創建驗證失敗的請求（缺少必填欄位）
+     * Create validation failed request (missing required fields)
      */
     public static AuditRegisterRequest createInvalidRequest() {
         AuditRegisterRequest request = new AuditRegisterRequest();
         List<AuditRegisterTransaction> transactions = new ArrayList<>();
         
         AuditRegisterTransaction txn = new AuditRegisterTransaction();
-        // 故意不設置必填欄位
+        // Intentionally not set required fields
         // txn.setTransactionType(null);
         // txn.setDeviceId(null);
         // txn.setBeId(null);
@@ -192,14 +192,14 @@ public class TestDataBuilder {
     }
 
     /**
-     * 創建空條目的請求（用於測試驗證）
+     * Create empty entries request (for testing validation)
      */
     public static AuditRegisterRequest createEmptyEntriesRequest() {
         AuditRegisterRequest request = new AuditRegisterRequest();
         List<AuditRegisterTransaction> transactions = new ArrayList<>();
         
         AuditRegisterTransaction txn = createBasicTransaction();
-        txn.setAuditRegisterEntries(new ArrayList<>()); // 空條目列表
+        txn.setAuditRegisterEntries(new ArrayList<>()); // Empty entries list
         
         transactions.add(txn);
         request.setAuditRegisterTxns(transactions);
@@ -207,7 +207,7 @@ public class TestDataBuilder {
     }
 
     /**
-     * 創建特定設備和業務日期的請求
+     * Create request for specific device and business date
      */
     public static AuditRegisterRequest createRequestForDeviceAndDate(
             String deviceId, LocalDate businessDate, Integer seqNum) {

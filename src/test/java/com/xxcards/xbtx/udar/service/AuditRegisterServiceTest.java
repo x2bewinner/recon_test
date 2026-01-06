@@ -25,7 +25,7 @@ import static org.junit.jupiter.api.Assertions.*;
 @SpringBootTest
 @ActiveProfiles("test")
 @Transactional
-@DisplayName("審計註冊服務測試")
+@DisplayName("Audit Register Service Test")
 class AuditRegisterServiceTest {
 
     @Autowired
@@ -42,14 +42,14 @@ class AuditRegisterServiceTest {
 
     @BeforeEach
     void setUp() {
-        // 清理測試資料
+        // Clean up test data
         mirrorArRepository.deleteAll();
         mirrorArDetailRepository.deleteAll();
         deviceAuditRegisterSummaryRepository.deleteAll();
     }
 
     @Test
-    @DisplayName("測試基本交易處理 - 應該成功處理並保存到資料庫")
+    @DisplayName("Test basic transaction processing - should successfully process and save to database")
     void testProcessBasicTransaction() {
         // Given
         AuditRegisterRequest request = TestDataBuilder.createBasicRequest();
@@ -63,13 +63,13 @@ class AuditRegisterServiceTest {
         assertNull(response.getErrors());
         assertTrue(response.getResponseMessage().contains("Successfully processed"));
 
-        // 驗證資料已保存到資料庫
+        // Verify data saved to database
         assertEquals(1, mirrorArRepository.count());
         assertEquals(1, mirrorArDetailRepository.count());
     }
 
     @Test
-    @DisplayName("測試設備累計摘要 - 第一次請求應該創建新摘要")
+    @DisplayName("Test device accumulated summary - first request should create new summary")
     void testDeviceSummaryFirstRequest() {
         // Given
         AuditRegisterRequest request = TestDataBuilder.createBasicRequest();
@@ -91,19 +91,19 @@ class AuditRegisterServiceTest {
     }
 
     @Test
-    @DisplayName("測試設備累計摘要 - 第二次請求應該累計到現有摘要")
+    @DisplayName("Test device accumulated summary - second request should accumulate to existing summary")
     void testDeviceSummaryAccumulation() {
         // Given
         String deviceId = "DEVICE-001";
         LocalDate businessDate = LocalDate.now();
         String clientRequestId = "TEST-003";
 
-        // 第一次請求
+        // First request
         AuditRegisterRequest request1 = TestDataBuilder.createRequestForDeviceAndDate(
                 deviceId, businessDate, 1);
         auditRegisterService.processAuditRegister(request1, clientRequestId);
 
-        // 第二次請求
+        // Second request
         AuditRegisterRequest request2 = TestDataBuilder.createRequestForDeviceAndDate(
                 deviceId, businessDate, 2);
         request2.getAuditRegisterTxns().get(0).getAuditRegisterEntries().get(0)
@@ -127,19 +127,19 @@ class AuditRegisterServiceTest {
     }
 
     @Test
-    @DisplayName("測試設備重啟處理 - seqNum 重置後應該正確累計")
+    @DisplayName("Test device restart handling - should correctly accumulate after seqNum reset")
     void testDeviceRestartHandling() {
         // Given
         String deviceId = "DEVICE-001";
         LocalDate businessDate = LocalDate.now();
         String clientRequestId = "TEST-004";
 
-        // 第一次請求 (seqNum = 1)
+        // First request (seqNum = 1)
         AuditRegisterRequest request1 = TestDataBuilder.createRequestForDeviceAndDate(
                 deviceId, businessDate, 1);
         auditRegisterService.processAuditRegister(request1, clientRequestId);
 
-        // 第二次請求 (seqNum = 2)
+        // Second request (seqNum = 2)
         AuditRegisterRequest request2 = TestDataBuilder.createRequestForDeviceAndDate(
                 deviceId, businessDate, 2);
         request2.getAuditRegisterTxns().get(0).getAuditRegisterEntries().get(0)
@@ -148,7 +148,7 @@ class AuditRegisterServiceTest {
                 .setValue(1500.00);
         auditRegisterService.processAuditRegister(request2, clientRequestId);
 
-        // 設備重啟後 (seqNum = 1，小於之前的最大值 2)
+        // After device restart (seqNum = 1, less than previous maximum 2)
         AuditRegisterRequest request3 = TestDataBuilder.createRequestForDeviceAndDate(
                 deviceId, businessDate, 1);
         request3.getAuditRegisterTxns().get(0).getAuditRegisterEntries().get(0)
@@ -166,14 +166,14 @@ class AuditRegisterServiceTest {
 
         assertTrue(summary.isPresent());
         DeviceAuditRegisterSummary s = summary.get();
-        // 應該累計：10 + 15 + 5 = 30
+        // Should accumulate: 10 + 15 + 5 = 30
         assertEquals(30L, s.getTotalCount());
-        // 應該累計：1000.50 + 1500.00 + 500.00 = 3000.50
+        // Should accumulate: 1000.50 + 1500.00 + 500.00 = 3000.50
         assertEquals(BigDecimal.valueOf(3000.50), s.getTotalValue());
     }
 
     @Test
-    @DisplayName("測試跨日期交易處理 - 業務日期是昨天應該正確累計到昨天的摘要")
+    @DisplayName("Test cross-date transaction processing - business date is yesterday should correctly accumulate to yesterday summary")
     void testCrossDateTransaction() {
         // Given
         String deviceId = "DEVICE-001";
@@ -181,7 +181,7 @@ class AuditRegisterServiceTest {
         LocalDate today = LocalDate.now();
         String clientRequestId = "TEST-005";
 
-        // 昨天的交易在今天發送
+        // Yesterday transactions sent today
         AuditRegisterRequest request = TestDataBuilder.createRequestForDeviceAndDate(
                 deviceId, yesterday, 1);
 
@@ -189,7 +189,7 @@ class AuditRegisterServiceTest {
         auditRegisterService.processAuditRegister(request, clientRequestId);
 
         // Then
-        // 應該創建昨天的摘要，而不是今天的
+        // Should create yesterday summary, not today
         Optional<DeviceAuditRegisterSummary> summaryYesterday = deviceAuditRegisterSummaryRepository
                 .findByDeviceIdAndBeIdAndBusinessDateAndArTypeIdentifierAndCardMediaTypeId(
                         deviceId, 1, yesterday, "AR-TYPE-001", "CARD-001");
@@ -198,8 +198,8 @@ class AuditRegisterServiceTest {
                 .findByDeviceIdAndBeIdAndBusinessDateAndArTypeIdentifierAndCardMediaTypeId(
                         deviceId, 1, today, "AR-TYPE-001", "CARD-001");
 
-        assertTrue(summaryYesterday.isPresent(), "應該創建昨天的摘要");
-        assertFalse(summaryToday.isPresent(), "不應該創建今天的摘要");
+        assertTrue(summaryYesterday.isPresent(), "Should create yesterday summary");
+        assertFalse(summaryToday.isPresent(), "Should not create today summary");
 
         DeviceAuditRegisterSummary s = summaryYesterday.get();
         assertEquals(10L, s.getTotalCount());
@@ -207,7 +207,7 @@ class AuditRegisterServiceTest {
     }
 
     @Test
-    @DisplayName("測試多條目交易 - 應該為每個條目創建摘要")
+    @DisplayName("Test multi-entry transaction - should create summary for each entry")
     void testMultiEntryTransaction() {
         // Given
         AuditRegisterRequest request = TestDataBuilder.createMultiEntryRequest();
@@ -217,14 +217,14 @@ class AuditRegisterServiceTest {
         auditRegisterService.processAuditRegister(request, clientRequestId);
 
         // Then
-        // 應該創建 3 個不同的摘要記錄
+        // Should create 3 different summary records
         List<DeviceAuditRegisterSummary> summaries = deviceAuditRegisterSummaryRepository
                 .findByDeviceIdAndBeIdAndBusinessDate(
                         "DEVICE-001", 1, LocalDate.now());
 
         assertEquals(3, summaries.size());
 
-        // 驗證每個條目的摘要
+        // Verify summary for each entry
         summaries.forEach(summary -> {
             assertNotNull(summary.getTotalCount());
             assertNotNull(summary.getTotalValue());
@@ -232,7 +232,7 @@ class AuditRegisterServiceTest {
     }
 
     @Test
-    @DisplayName("測試批次處理 - 應該處理多筆交易")
+    @DisplayName("Test batch processing - should process multiple transactions")
     void testBatchProcessing() {
         // Given
         AuditRegisterRequest request = TestDataBuilder.createBatchRequest(5);
@@ -248,39 +248,39 @@ class AuditRegisterServiceTest {
     }
 
     @Test
-    @DisplayName("測試部分失敗處理 - 部分交易失敗應該返回 PARTIAL_SUCCESS")
+    @DisplayName("Test partial failure handling - partial transaction failures should return PARTIAL_SUCCESS")
     void testPartialFailure() {
         // Given
         AuditRegisterRequest request = TestDataBuilder.createBasicRequest();
         String clientRequestId = "TEST-008";
 
-        // 添加一筆無效交易（缺少必填欄位）
+        // Add an invalid transaction (missing required fields)
         request.getAuditRegisterTxns().add(TestDataBuilder.createBasicTransaction());
-        request.getAuditRegisterTxns().get(1).setDeviceId(null); // 設置為 null 以觸發錯誤
+        request.getAuditRegisterTxns().get(1).setDeviceId(null); // Set to null to trigger error
 
         // When
         AuditRegisterResponse response = auditRegisterService.processAuditRegister(request, clientRequestId);
 
         // Then
-        // 注意：由於驗證在 Controller 層進行，Service 層可能不會收到無效請求
-        // 這個測試主要驗證異常處理邏輯
+        // Note: Since validation is performed at Controller layer, Service layer may not receive invalid requests
+        // This test mainly verifies exception handling logic
         assertNotNull(response);
         assertNotNull(response.getResponseCode());
     }
 
     @Test
-    @DisplayName("測試不同設備的獨立摘要")
+    @DisplayName("Test independent summaries for different devices")
     void testDifferentDevicesIndependentSummary() {
         // Given
         LocalDate businessDate = LocalDate.now();
         String clientRequestId = "TEST-009";
 
-        // 設備 1 的請求
+        // Request for device 1
         AuditRegisterRequest request1 = TestDataBuilder.createRequestForDeviceAndDate(
                 "DEVICE-001", businessDate, 1);
         auditRegisterService.processAuditRegister(request1, clientRequestId);
 
-        // 設備 2 的請求
+        // Request for device 2
         AuditRegisterRequest request2 = TestDataBuilder.createRequestForDeviceAndDate(
                 "DEVICE-002", businessDate, 1);
         auditRegisterService.processAuditRegister(request2, clientRequestId);
@@ -296,13 +296,13 @@ class AuditRegisterServiceTest {
 
         assertTrue(summary1.isPresent());
         assertTrue(summary2.isPresent());
-        // 兩個設備的摘要應該獨立
+        // Summaries for two devices should be independent
         assertEquals(10L, summary1.get().getTotalCount());
         assertEquals(10L, summary2.get().getTotalCount());
     }
 
     @Test
-    @DisplayName("測試不同業務日期的獨立摘要")
+    @DisplayName("Test independent summaries for different business dates")
     void testDifferentBusinessDatesIndependentSummary() {
         // Given
         String deviceId = "DEVICE-001";
@@ -310,12 +310,12 @@ class AuditRegisterServiceTest {
         LocalDate date2 = LocalDate.now().plusDays(1);
         String clientRequestId = "TEST-010";
 
-        // 日期 1 的請求
+        // Request for date 1
         AuditRegisterRequest request1 = TestDataBuilder.createRequestForDeviceAndDate(
                 deviceId, date1, 1);
         auditRegisterService.processAuditRegister(request1, clientRequestId);
 
-        // 日期 2 的請求
+        // Request for date 2
         AuditRegisterRequest request2 = TestDataBuilder.createRequestForDeviceAndDate(
                 deviceId, date2, 1);
         auditRegisterService.processAuditRegister(request2, clientRequestId);
@@ -331,7 +331,7 @@ class AuditRegisterServiceTest {
 
         assertTrue(summary1.isPresent());
         assertTrue(summary2.isPresent());
-        // 兩個日期的摘要應該獨立
+        // Summaries for two dates should be independent
         assertEquals(10L, summary1.get().getTotalCount());
         assertEquals(10L, summary2.get().getTotalCount());
     }

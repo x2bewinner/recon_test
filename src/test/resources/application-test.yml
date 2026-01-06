@@ -28,7 +28,7 @@ spring:
       path: /h2-console
 
 server:
-  port: 0  # 使用隨機端口進行測試
+  port: 0  # Use random port for testing
 
 logging:
   level:

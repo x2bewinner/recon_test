@@ -15,19 +15,19 @@ import java.util.Optional;
 public interface DeviceAuditRegisterSummaryRepository extends JpaRepository<DeviceAuditRegisterSummary, DeviceAuditRegisterSummaryId> {
 
     /**
-     * 查詢指定設備在指定業務日期的所有摘要記錄
+     * Query all summary records for specified device on specified business date
      */
     List<DeviceAuditRegisterSummary> findByDeviceIdAndBeIdAndBusinessDate(
             String deviceId, Integer beId, LocalDate businessDate);
 
     /**
-     * 查詢指定設備在指定業務日期和AR類型的摘要記錄
+     * Query summary record for specified device on specified business date and AR type
      */
     Optional<DeviceAuditRegisterSummary> findByDeviceIdAndBeIdAndBusinessDateAndArTypeIdentifierAndCardMediaTypeId(
             String deviceId, Integer beId, LocalDate businessDate, String arTypeIdentifier, String cardMediaTypeId);
 
     /**
-     * 查詢指定設備的最大AR序列號（用於檢測設備是否重啟）
+     * Query maximum AR sequence number for specified device (used to detect device restart)
      */
     @Query("SELECT MAX(d.lastArSeqNum) FROM DeviceAuditRegisterSummary d " +
            "WHERE d.deviceId = :deviceId AND d.beId = :beId AND d.businessDate = :businessDate")

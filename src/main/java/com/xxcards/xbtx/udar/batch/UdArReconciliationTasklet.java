@@ -1,5 +1,6 @@
 package com.xxcards.xbtx.udar.batch;
 
+import com.xxcards.xbtx.udar.constant.LogMessage;
 import com.xxcards.xbtx.udar.service.UdArReconciliationService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -22,7 +23,7 @@ public class UdArReconciliationTasklet implements Tasklet {
 
     @Override
     public RepeatStatus execute(StepContribution contribution, ChunkContext chunkContext) throws Exception {
-        log.info("Starting UdArReconciliationTasklet execution");
+        log.info(LogMessage.I_BATCH_UD_AR_TASKLET_START.getMessage());
         
         try {
             // Get settlementDate from JobParameters
@@ -32,12 +33,12 @@ public class UdArReconciliationTasklet implements Tasklet {
                     .toString();
             
             LocalDate settlementDate = LocalDate.parse(settlementDateStr, DATE_FORMATTER);
-            log.info("Retrieved settlement date from JobParameters: {}", settlementDate);
+            log.info(LogMessage.I_BATCH_RETRIEVE_SETTLEMENT_DATE.getMessage(), settlementDate);
             
             // Process 7 days backwards (inclusive of current day)
             // From settlementDate - 6 days to settlementDate, total 7 days
             LocalDate startDate = settlementDate.minusDays(6);
-            log.info("Starting backward processing, date range: {} to {} (7 days total)", startDate, settlementDate);
+            log.info(LogMessage.I_BATCH_START_BACKWARD_PROCESSING.getMessage(), startDate, settlementDate);
             
             int successCount = 0;
             int failureCount = 0;
@@ -45,44 +46,44 @@ public class UdArReconciliationTasklet implements Tasklet {
             // Loop through each day
             for (int i = 0; i < 7; i++) {
                 LocalDate currentDate = startDate.plusDays(i);
-                log.info("Processing date {}/7: {}", i + 1, currentDate);
+                log.info(LogMessage.I_BATCH_PROCESSING_DATE.getMessage(), i + 1, currentDate);
                 
                 try {
                     boolean success = udArReconciliationService.executeReconciliation(currentDate);
                     
                     if (success) {
                         successCount++;
-                        log.info("Date {} processed successfully", currentDate);
+                        log.info(LogMessage.I_BATCH_DATE_PROCESSED_SUCCESS.getMessage(), currentDate);
                     } else {
                         failureCount++;
-                        log.error("Date {} processing failed", currentDate);
+                        log.error(LogMessage.E_BATCH_DATE_PROCESSED_FAIL.getMessage(), currentDate);
                         // Continue processing other dates, don't throw exception immediately
                     }
                 } catch (Exception e) {
                     failureCount++;
-                    log.error("Exception occurred while processing date {}", currentDate, e);
+                    log.error(LogMessage.E_BATCH_DATE_PROCESSING_EXCEPTION.getMessage(), currentDate, e);
                     // Continue processing other dates
                 }
             }
             
             // If all dates failed, throw exception
             if (successCount == 0) {
-                log.error("All dates processing failed, success: {}, failure: {}", successCount, failureCount);
+                log.error(LogMessage.E_BATCH_ALL_DATES_FAILED.getMessage(), successCount, failureCount);
                 throw new RuntimeException("Failed to execute UD AR reconciliation: all dates processing failed");
             }
             
             // If partial failure, log warning but continue
             if (failureCount > 0) {
-                log.warn("Partial dates processing failed, success: {}, failure: {}", successCount, failureCount);
+                log.warn(LogMessage.BATCH_PARTIAL_DATES_FAILED.getMessage(), successCount, failureCount);
             }
             
-            log.info("UdArReconciliationTasklet execution completed, success: {}, failure: {}", successCount, failureCount);
+            log.info(LogMessage.I_BATCH_UD_AR_TASKLET_COMPLETED.getMessage(), successCount, failureCount);
             contribution.incrementWriteCount(successCount);
             
             return RepeatStatus.FINISHED;
             
         } catch (Exception e) {
-            log.error("Exception occurred during UdArReconciliationTasklet execution", e);
+            log.error(LogMessage.E_BATCH_UD_AR_TASKLET_EXCEPTION.getMessage(), e);
             throw e;
         }
     }

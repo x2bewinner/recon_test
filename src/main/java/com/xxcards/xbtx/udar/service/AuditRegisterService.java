@@ -1,5 +1,6 @@
 package com.xxcards.xbtx.udar.service;
 
+import com.xxcards.xbtx.udar.constant.LogMessage;
 import com.xxcards.xbtx.udar.dto.AuditRegisterEntry;
 import com.xxcards.xbtx.udar.dto.AuditRegisterRequest;
 import com.xxcards.xbtx.udar.dto.AuditRegisterResponse;
@@ -50,7 +51,7 @@ public class AuditRegisterService {
                     processTransaction(txn, clientRequestId);
                     successCount++;
                 } catch (Exception e) {
-                    log.error("Error processing transaction for deviceId: {}, seqNum: {}", 
+                    log.error(LogMessage.E_SERVICE_AUDIT_REGISTER_TRANSACTION_ERROR.getMessage(), 
                             txn.getDeviceId(), txn.getAuditRegisterSeqNum(), e);
                     errors.add(String.format("Transaction processing failed for deviceId: %s, seqNum: %d - %s",
                             txn.getDeviceId(), txn.getAuditRegisterSeqNum(), e.getMessage()));
@@ -75,7 +76,7 @@ public class AuditRegisterService {
                         .build();
             }
         } catch (Exception e) {
-            log.error("Unexpected error processing audit register request", e);
+            log.error(LogMessage.E_SERVICE_AUDIT_REGISTER_UNEXPECTED_ERROR.getMessage(), e);
             return AuditRegisterResponse.builder()
                     .responseCode("ERROR")
                     .responseMessage("Failed to process audit register request: " + e.getMessage())
@@ -95,9 +96,7 @@ public class AuditRegisterService {
         boolean deviceRestarted = checkDeviceRestart(txn);
         
         if (deviceRestarted) {
-            log.warn("Device restart detected for deviceId: {}, beId: {}, businessDate: {}. " +
-                    "Current AR seqNum: {}, Previous max seqNum exists. " +
-                    "Will use accumulated counts from database.",
+            log.warn(LogMessage.SERVICE_DEVICE_RESTART_DETECTED.getMessage(),
                     txn.getDeviceId(), txn.getBeId(), txn.getBusinessDate(), 
                     txn.getAuditRegisterSeqNum());
         }
@@ -121,45 +120,41 @@ public class AuditRegisterService {
     }
     
     /**
-     * 檢查並記錄跨日期場景（前一天的未完成交易）
-     * 例如：10-Dec 的交易在 11-Dec 發送
+     * Check and log cross-date scenario (outstanding transactions from previous day)
+     * Example: Transactions from 10-Dec sent on 11-Dec
      */
     private void checkAndLogCrossDateScenario(AuditRegisterTransaction txn) {
         LocalDate businessDate = txn.getBusinessDate();
         LocalDate currentDate = LocalDate.now();
         OffsetDateTime transactionDateTime = txn.getTransactionDateTime();
         
-        // 如果業務日期不是今天，可能是跨日期的未完成交易
+        // If business date is not today, it may be outstanding transactions from a previous date
         if (!businessDate.equals(currentDate)) {
             if (businessDate.isBefore(currentDate)) {
-                log.info("Processing outstanding transactions from previous business date. " +
-                        "DeviceId: {}, BusinessDate: {}, TransactionDateTime: {}, CurrentDate: {}. " +
-                        "This may be outstanding transactions that were not uploaded before device shutdown.",
+                log.info(LogMessage.I_SERVICE_PROCESSING_OUTSTANDING_TRANSACTIONS.getMessage(),
                         txn.getDeviceId(), businessDate, transactionDateTime, currentDate);
             } else {
-                log.warn("Business date is in the future. DeviceId: {}, BusinessDate: {}, CurrentDate: {}",
+                log.warn(LogMessage.SERVICE_BUSINESS_DATE_IN_FUTURE.getMessage(),
                         txn.getDeviceId(), businessDate, currentDate);
             }
         }
         
-        // 檢查交易時間和業務日期是否一致（允許一定範圍的差異）
+        // Check if transaction time and business date are consistent (allow certain range of differences)
         if (transactionDateTime != null) {
             LocalDate transactionDate = transactionDateTime.toLocalDate();
-            // 如果交易日期和業務日期不一致，記錄警告
+            // If transaction date and business date are inconsistent, log warning
             if (!transactionDate.equals(businessDate) && 
                 !transactionDate.equals(businessDate.minusDays(1)) && 
                 !transactionDate.equals(businessDate.plusDays(1))) {
-                log.warn("Transaction date and business date mismatch. " +
-                        "DeviceId: {}, BusinessDate: {}, TransactionDate: {}. " +
-                        "This may indicate data inconsistency.",
+                log.warn(LogMessage.SERVICE_DATE_MISMATCH.getMessage(),
                         txn.getDeviceId(), businessDate, transactionDate);
             }
         }
     }
     
     /**
-     * 檢查設備是否重啟（計數重置）
-     * 如果當前的 auditRegisterSeqNum 小於之前記錄的最大值，說明設備重啟了
+     * Check if device was restarted (count reset)
+     * If current auditRegisterSeqNum is less than previously recorded maximum, device was restarted
      */
     private boolean checkDeviceRestart(AuditRegisterTransaction txn) {
         Optional<Integer> maxSeqNum = deviceAuditRegisterSummaryRepository
@@ -175,10 +170,10 @@ public class AuditRegisterService {
     }
     
     /**
-     * 更新設備審計註冊摘要
-     * 處理設備重啟後計數重置的情況，確保累計計數正確
-     * 重要：摘要按業務日期（businessDate）分組，因此跨日期發送的未完成交易
-     * （例如 10-Dec 的交易在 11-Dec 發送）會正確累計到對應的業務日期
+     * Update device audit register summary
+     * Handle device restart count reset scenario, ensure accumulated counts are correct
+     * Important: Summary is grouped by businessDate, so outstanding transactions sent across dates
+     * (e.g., transactions from 10-Dec sent on 11-Dec) will be correctly accumulated to the corresponding business date
      */
     private void updateDeviceAuditRegisterSummary(AuditRegisterTransaction txn, boolean deviceRestarted) {
         LocalDate businessDate = txn.getBusinessDate();
@@ -190,28 +185,28 @@ public class AuditRegisterService {
             String cardMediaTypeId = entry.getCardMediaTypeId() != null ? 
                     entry.getCardMediaTypeId() : "";
             
-            // 查詢現有的摘要記錄（按業務日期查詢，確保跨日期交易正確累計）
+            // Query existing summary record (query by business date to ensure cross-date transactions are correctly accumulated)
             Optional<DeviceAuditRegisterSummary> existingSummary = 
                     deviceAuditRegisterSummaryRepository.findByDeviceIdAndBeIdAndBusinessDateAndArTypeIdentifierAndCardMediaTypeId(
                             txn.getDeviceId(), 
                             txn.getBeId(), 
-                            businessDate,  // 使用業務日期，不是當前日期
+                            businessDate,  // Use business date, not current date
                             entry.getArTypeIdentifier(), 
                             cardMediaTypeId);
             
             DeviceAuditRegisterSummary summary;
             
             if (existingSummary.isPresent()) {
-                // 更新現有記錄
+                // Update existing record
                 summary = existingSummary.get();
                 
                 Long currentCount = entry.getCount() != null ? entry.getCount().longValue() : 0L;
                 BigDecimal currentValue = entry.getValue() != null ? 
                         BigDecimal.valueOf(entry.getValue()) : BigDecimal.ZERO;
                 
-                // 累計計數和金額
-                // 注意：即使設備重啟或跨日期發送，累計邏輯相同
-                // 因為我們按業務日期分組，所以會正確累計到對應的業務日期
+                // Accumulate count and amount
+                // Note: Even if device restarted or sent across dates, accumulation logic is the same
+                // Because we group by business date, it will correctly accumulate to the corresponding business date
                 Long previousCount = summary.getTotalCount();
                 BigDecimal previousValue = summary.getTotalValue() != null ? 
                         summary.getTotalValue() : BigDecimal.ZERO;
@@ -225,26 +220,21 @@ public class AuditRegisterService {
                 summary.setLastUpdatedTime(now);
                 
                 if (isCrossDate) {
-                    log.info("Updating cross-date summary for deviceId: {}, businessDate: {}, currentDate: {}. " +
-                            "arType: {}, cardMediaType: {}. " +
-                            "Previous total: count={}, value={}. Current: count={}, value={}. " +
-                            "New total: count={}, value={}",
+                    log.info(LogMessage.I_SERVICE_UPDATE_CROSS_DATE_SUMMARY.getMessage(),
                             txn.getDeviceId(), businessDate, currentDate,
                             entry.getArTypeIdentifier(), cardMediaTypeId,
                             previousCount, previousValue,
                             currentCount, currentValue,
                             newTotalCount, newTotalValue);
                 } else {
-                    log.debug("Updated summary for deviceId: {}, arType: {}, cardMediaType: {}. " +
-                            "Previous total: count={}, value={}. Current: count={}, value={}. " +
-                            "New total: count={}, value={}",
+                    log.debug(LogMessage.SERVICE_UPDATE_SUMMARY_DEBUG.getMessage(),
                             txn.getDeviceId(), entry.getArTypeIdentifier(), cardMediaTypeId,
                             previousCount, previousValue,
                             currentCount, currentValue,
                             newTotalCount, newTotalValue);
                 }
             } else {
-                // 創建新記錄
+                // Create new record
                 Long initialCount = entry.getCount() != null ? entry.getCount().longValue() : 0L;
                 BigDecimal initialValue = entry.getValue() != null ? 
                         BigDecimal.valueOf(entry.getValue()) : BigDecimal.ZERO;
@@ -252,7 +242,7 @@ public class AuditRegisterService {
                 summary = DeviceAuditRegisterSummary.builder()
                         .deviceId(txn.getDeviceId())
                         .beId(txn.getBeId())
-                        .businessDate(businessDate)  // 使用業務日期，確保跨日期交易正確分組
+                        .businessDate(businessDate)  // Use business date to ensure cross-date transactions are correctly grouped
                         .arTypeIdentifier(entry.getArTypeIdentifier())
                         .cardMediaTypeId(cardMediaTypeId)
                         .totalCount(initialCount)
@@ -263,15 +253,12 @@ public class AuditRegisterService {
                         .build();
                 
                 if (isCrossDate) {
-                    log.info("Creating cross-date summary for deviceId: {}, businessDate: {}, currentDate: {}. " +
-                            "arType: {}, cardMediaType: {}. " +
-                            "Initial: count={}, value={}",
+                    log.info(LogMessage.I_SERVICE_CREATE_CROSS_DATE_SUMMARY.getMessage(),
                             txn.getDeviceId(), businessDate, currentDate,
                             entry.getArTypeIdentifier(), cardMediaTypeId,
                             initialCount, initialValue);
                 } else {
-                    log.debug("Created new summary for deviceId: {}, arType: {}, cardMediaType: {}. " +
-                            "Initial: count={}, value={}",
+                    log.debug(LogMessage.SERVICE_CREATE_SUMMARY_DEBUG.getMessage(),
                             txn.getDeviceId(), entry.getArTypeIdentifier(), cardMediaTypeId,
                             initialCount, initialValue);
                 }
@@ -370,7 +357,7 @@ public class AuditRegisterService {
                 entryIndex++;
             }
         } catch (Exception e) {
-            log.error("Failed to save to exception tables", e);
+            log.error(LogMessage.E_SERVICE_SAVE_TO_EXCEPTION_TABLES_ERROR.getMessage(), e);
         }
     }
 
