@@ -118,7 +118,7 @@ spring:
 
 logging:
   level:
-    com.financial.recon: DEBUG  # 日誌級別（DEBUG/INFO/WARN/ERROR）
+    com.xxcards.xbtx.udar: DEBUG  # 日誌級別（DEBUG/INFO/WARN/ERROR）
 ```
 
 ## 🎯 啟動應用程式
@@ -474,7 +474,7 @@ A: 在 `application.yml` 中調整日誌級別：
 ```yaml
 logging:
   level:
-    com.financial.recon: DEBUG
+    com.xxcards.xbtx.udar: DEBUG
 ```
 
 ### Q4: 設備重啟後計數不正確怎麼辦？

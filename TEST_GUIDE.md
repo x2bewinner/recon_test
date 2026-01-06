@@ -319,7 +319,7 @@ spring:
 ```yaml
 logging:
   level:
-    com.financial.recon: DEBUG
+    com.xxcards.xbtx.udar: DEBUG
     org.springframework.web: DEBUG
     org.hibernate.SQL: DEBUG
 ```
