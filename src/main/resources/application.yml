@@ -25,6 +25,13 @@ spring:
         jdbc:
           time_zone: UTC
 
+  batch:
+    job:
+      enabled: false  # 設為 false，手動觸發 Job
+    jdbc:
+      initialize-schema: always  # 自動初始化 Spring Batch 元數據表
+      table-prefix: BATCH_  # Spring Batch 表前綴
+
 server:
   port: 8080
   servlet:
