@@ -18,7 +18,8 @@ public class UdArReconciliationServiceImpl implements UdArReconciliationService 
     public boolean executeReconciliation(LocalDate settlementDate) {
         try {
             log.info("Service: Starting UD AR reconciliation, settlement date: {}", settlementDate);
-            boolean result = udArReconciliationRepository.callReconciliationProcedure(settlementDate);
+            int affectedRows = udArReconciliationRepository.insertUdArReconciliationResults(settlementDate);
+            boolean result = affectedRows >= 0; // 0 rows is also considered success (no data)
             
             if (result) {
                 log.info("Service: UD AR reconciliation succeeded, settlement date: {}", settlementDate);

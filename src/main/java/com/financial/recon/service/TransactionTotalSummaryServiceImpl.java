@@ -18,7 +18,8 @@ public class TransactionTotalSummaryServiceImpl implements TransactionTotalSumma
     public boolean calculateTransactionTotal(LocalDate settlementDate) {
         try {
             log.info("Service: Starting transaction total calculation, settlement date: {}", settlementDate);
-            boolean result = transactionTotalSummaryRepository.callCalculateTransactionTotalProcedure(settlementDate);
+            int affectedRows = transactionTotalSummaryRepository.insertTransactionTotals(settlementDate);
+            boolean result = affectedRows >= 0; // 0 rows is also considered success (no data)
             
             if (result) {
                 log.info("Service: Transaction total calculation succeeded, settlement date: {}", settlementDate);
